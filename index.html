@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html ng-app="SFHomelessnessApp">
+
+  <head>
+    <meta charset="utf-8" />
+    <title>Sentiment analysis of tweets about homelessness in San Francisco</title>
+    <script>document.write('<base href="' + document.location + '" />');</script>
+    <link rel="stylesheet" href="style.css" />
+    <link rel="stylesheet" href="./bower_components/nvd3/build/nv.d3.min.css"/>
+    <script src="./bower_components/angular/angular.min.js"></script>
+    <script src="./bower_components/d3/d3.min.js" charset="utf-8"></script>
+    <script src="./bower_components/nvd3/build/nv.d3.min.js"></script>
+    <script src="./bower_components/angular-nvd3/dist/angular-nvd3.min.js"></script>
+    <script src="sfHomelessData.js" charset="utf-8"></script>
+    <script src="scatter.js"></script>
+
+  </head>
+
+  <body ng-controller="MainCtrl">
+
+    <nvd3 options="options" data="data" config="config"></nvd3>
+
+  </body>
+
+</html>
