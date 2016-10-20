@@ -1,149 +1,61 @@
 <html>
 <head>
+  <title>SF Homeless Project</title>
+  <meta charset="utf-8">
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.4/jquery.min.js"></script>
   <script src="jquery.csv.min.js"></script>
   <script type="text/javascript" src="https://www.google.com/jsapi"></script>
   <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
   <script language="javascript" type="text/javascript" src="sketch.js"></script>
   
-  <!-- <div id="sankey_multiple" style="margin: auto; width: 1160px; height: 680px; padding: 30px;"></div> -->
-   <div id="sankey_multiple" style="margin: auto;  padding: 30px;"></div>
+  <style type="text/css">
+  html {
+    height: 100%;
+  }
+  body {
+    background-color: #000000;
+    font-size: 18px;
+    color: #ffffff;
+    font-family: sans-serif;
+    font-size: 13px;
+    line-height: 20px;
+    height: 100%;
+
+  }
+
+  #sankey_multiple {
+    width: 95%;
+    height: 80%;
+  }
 
 
- <div id="title">
-   SF Homeless Project
-  </div>
+  #info {
+    font-size: 13px;
+    position: absolute;
+    bottom: 5px;
+    background-color: rgba(0,0,0,0.8);
+    border-radius: 3px;
+    right: 10px;
+    padding: 10px;
+  }
 
-  <div id="info">
-    <strong>SF Homeless Project</strong> <span class="bull">&bull;</span> Created by <a href="http://qianqian-ye.com/" style="color: #b3ecec">Qianqian Ye </a> <span class="bull">&bull;</span> 
-  </div>
-
-<!--  <div id="label_Age"> 
-    Age 
-  </div>
- 
-  <div id="label_Race"> 
-  Race
-  </div>
-
-   <div id="label_Gender"> 
-    Gender
-  </div>
-
-   <div id="label_Armed"> 
-    Armed 
-  </div>
-
-   <div id="label_Classification"> 
-    Classification
-  </div>
-
-   <div id="label_State"> 
-    State
-  </div> -->
-
-
-    <title>Homeless</title>
-    <meta charset="utf-8">
-    <style type="text/css">
-      html {
-        height: 100%;
-      }
-      body {
-        background-color: #000000;
-         font-size: 18px;
-        color: #ffffff;
-        font-family: sans-serif;
-        font-size: 13px;
-        line-height: 20px;
-        height: 100%;
-
-      }
-
-      #sankey_multiple {
-        width: 95%;
-        height: 80%;
-      }
-
-
-      #info {
-        font-size: 13px;
-        position: absolute;
-        bottom: 5px;
-        background-color: rgba(0,0,0,0.8);
-        border-radius: 3px;
-        right: 10px;
-        padding: 10px;
-      }
-
-      #title {
-        position: absolute;
-        top: 20px;
-        width: 270px;
-        left: 20px;
-        background-color: rgba(0,0,0,0.2);
-        border-radius: 3px;
-        font: 22px Georgia;
-        padding: 10px;
-      }
-
-/*// -----------Label style place holder, still in progress....-----------// */
-      #label_Age{
-        font-size: 16px;
-        position: absolute;
-        width: 20%;
-        bottom: 10%;
-        left: 3%;
-        border-radius: 3px;
-      }
-
-      #label_Race{
-        font-size: 16px;
-        position: absolute;
-        width: 20%;
-        bottom: 10%;
-        left: 22%;
-        border-radius: 3px;
-      }        
-
-      #label_Gender{
-        font-size: 16px;
-        position: absolute;
-        width: 20%;
-        bottom: 10%;
-        left: 40%;
-        border-radius: 3px;
-      }   
-
-      #label_Armed{
-        font-size: 16px;
-        position: absolute;
-        width: 20%;
-        bottom: 10%;
-        left: 58%;
-        border-radius: 3px;
-      }    
-
-      #label_Classification{
-        font-size: 16px;
-        position: absolute;
-        width: 20%;
-        bottom: 10%;
-        left: 72%;
-        border-radius: 3px;
-      }  
-
-      #label_State{
-        font-size: 16px;
-        position: absolute;
-        width: 20%;
-        bottom: 10%;
-        left: 97%;
-        border-radius: 3px;
-      }      
-
-</style>
+  #title {
+    position: absolute;
+    top: 20px;
+    width: 270px;
+    left: 20px;
+    background-color: rgba(0,0,0,0.2);
+    border-radius: 3px;
+    font: 22px Georgia;
+    padding: 10px;
+  }     
+  </style>
 </head>
 <body>
+ <div id="sankey_multiple" style="margin: auto;  padding: 30px;"></div>
+ <div id="title">SF Homeless Project</div>
+ <div id="info">
+  <strong><a href="https://github.com/sfbrigade/datasci-sf-homeless-project" style="color: #cecece">Code for America Project</a></strong> <span class="bull">&bull;</span> Created by <a href="http://qianqian-ye.com/" style="color: #b3ecec">Qianqian Ye </a> <span class="bull">&bull;</span> Folk me on <a href="https://github.com/sfbrigade/datasci-sf-homeless-project/tree/master/reports/sankey" style="color: #cecece">Github</a>
+</div>
 </body>
 </html>
