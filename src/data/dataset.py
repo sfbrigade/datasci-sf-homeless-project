@@ -157,10 +157,13 @@ def process_data_enrollment(sheet='Enrollment', datadir=None):
     # calculate the number of days that someone was enrolled
     df_enroll['Days Enrolled'] = ((df_enroll['Exit Date'] - df_enroll['Entry Date']) / np.timedelta64(1, 'D')).astype(int)
     
+    old_col = 'Residential Move In Date'
     new_col = 'Days To Residential Move In'
-    df_enroll['Residential Move In Date'] = df_enroll['Residential Move In Date'].fillna(0)
-    df_enroll[new_col] = ((df_enroll['Residential Move In Date'] - df_enroll['Entry Date']) / np.timedelta64(1, 'D')).astype(int)
-    df_enroll.loc[df_enroll[new_col] < 0, new_col] = pd.NaT
+    dummy_date = pd.to_datetime('1970-01-01')
+    df_enroll[old_col] = df_enroll[old_col].fillna(dummy_date)
+    df_enroll[new_col] = ((df_enroll[old_col] - df_enroll['Entry Date']) / np.timedelta64(1, 'D')).astype(int)
+    df_enroll.loc[df_enroll[new_col] <= 0, new_col] = np.nan
+    df_enroll.loc[df_enroll[old_col] == dummy_date, old_col] = pd.NaT
     
     # remove anyone with negative number of enrollment days
     df_enroll = df_enroll[df_enroll['Days Enrolled'] >= 0]
@@ -175,7 +178,7 @@ def process_data_enrollment(sheet='Enrollment', datadir=None):
     df_enroll.loc[df_enroll[col] == 'Three to six months ago', col] = 6
     df_enroll.loc[df_enroll[col] == 'Within the past three months', col] = 3
     # and rename the column
-    df_enroll = df_enroll.rename(columns={col: 'DV When Occurred Months'})
+    df_enroll = df_enroll.rename(columns={col: 'Months Ago DV Occurred'})
     
     # process head of household to be boolean
     old_col = 'Relationship to HoH'
@@ -187,18 +190,17 @@ def process_data_enrollment(sheet='Enrollment', datadir=None):
     # turn Months Homeless This Time into numerical data
     col = 'Months Homeless This Time'
     df_enroll = encode_unknown(df_enroll, col)
-    df_enroll.loc[df_enroll[col] == 'Unknown', col] = '99999'
+    values = df_enroll[col].unique().tolist()
     df_enroll.loc[df_enroll[col] == 'More than 12 months', col] = '24'
-    df_enroll[col] = df_enroll[col].astype(int)
-    df_enroll.loc[df_enroll[col] == 99999, col] = np.nan
+    df_enroll[col] = df_enroll[col].apply(lambda x: int(x) if isinstance(x, str) & x.isnumeric() else x)
+    df_enroll.loc[df_enroll[col] == 'Unknown', col] = np.nan
     
     # turn Times Homeless Past Three Years into numerical data
     col = 'Times Homeless Past Three Years'
     df_enroll = encode_unknown(df_enroll, col)
-    df_enroll.loc[df_enroll[col] == 'Unknown', col] = '99999'
     df_enroll.loc[df_enroll[col] == '4 or more', col] = '4'
-    df_enroll[col] = df_enroll[col].astype(int)
-    df_enroll.loc[df_enroll[col] == 99999, col] = np.nan
+    df_enroll[col] = df_enroll[col].apply(lambda x: int(x) if isinstance(x, str) & x.isnumeric() else x)
+    df_enroll.loc[df_enroll[col] == 'Unknown', col] = np.nan
     
     return df_enroll
 
