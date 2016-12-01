@@ -1,6 +1,7 @@
 import numpy as np
 import pandas as pd
 import os
+import re
 
 def get_datadir():
     return os.path.join(os.getenv('HOME'), 'Dropbox', 'C4SF-datasci-homeless', 'raw')
@@ -47,6 +48,9 @@ def process_data_client(sheet='Client', datadir=None):
     df_client = pd.read_csv(infile, header=0, index_col=0, usecols=cols)
     df_client = df_client.dropna(how='all')
     df_client.index = df_client.index.astype(int)
+    
+    # remove any full duplicates
+    df_client = df_client.reset_index().drop_duplicates().set_index('Personal ID')
 
     cols = ['Race', 'Ethnicity', 'Veteran Status']
 
@@ -106,6 +110,9 @@ def process_data_enrollment(sheet='Enrollment', datadir=None):
     df_enroll = df_enroll.dropna(axis=0, how='all')
     df_enroll.index = df_enroll.index.astype(int)
 
+    # remove any full duplicates
+    df_enroll = df_enroll.reset_index().drop_duplicates().set_index('Personal ID')
+    
     # drop anyone for whom we don't have age
     df_enroll = df_enroll.dropna(subset=['Client Age at Entry'])
 
@@ -150,8 +157,48 @@ def process_data_enrollment(sheet='Enrollment', datadir=None):
     # calculate the number of days that someone was enrolled
     df_enroll['Days Enrolled'] = ((df_enroll['Exit Date'] - df_enroll['Entry Date']) / np.timedelta64(1, 'D')).astype(int)
     
+    new_col = 'Days To Residential Move In'
+    df_enroll['Residential Move In Date'] = df_enroll['Residential Move In Date'].fillna(0)
+    df_enroll[new_col] = ((df_enroll['Residential Move In Date'] - df_enroll['Entry Date']) / np.timedelta64(1, 'D')).astype(int)
+    df_enroll.loc[df_enroll[new_col] < 0, new_col] = pd.NaT
+    
     # remove anyone with negative number of enrollment days
     df_enroll = df_enroll[df_enroll['Days Enrolled'] >= 0]
+    
+    # turn DV When Occurred into numerical data
+    col = 'DV When Occurred'
+    df_enroll = encode_unknown(df_enroll, col)
+    df_enroll.loc[df_enroll[col] == 'Unknown', col] = np.nan
+    df_enroll.loc[df_enroll[col] == 'N/A - No Domestic Violence', col] = np.nan
+    df_enroll.loc[df_enroll[col] == 'More than a year ago', col] = 24
+    df_enroll.loc[df_enroll[col] == 'From six to twelve months ago', col] = 12
+    df_enroll.loc[df_enroll[col] == 'Three to six months ago', col] = 6
+    df_enroll.loc[df_enroll[col] == 'Within the past three months', col] = 3
+    # and rename the column
+    df_enroll = df_enroll.rename(columns={col: 'DV When Occurred Months'})
+    
+    # process head of household to be boolean
+    old_col = 'Relationship to HoH'
+    new_col = 'Head of Household'
+    df_enroll[new_col] = False
+    df_enroll.loc[df_enroll[old_col] == 'Self (head of household)', new_col] = True
+    df_enroll = df_enroll.drop(old_col, axis=1)
+    
+    # turn Months Homeless This Time into numerical data
+    col = 'Months Homeless This Time'
+    df_enroll = encode_unknown(df_enroll, col)
+    df_enroll.loc[df_enroll[col] == 'Unknown', col] = '99999'
+    df_enroll.loc[df_enroll[col] == 'More than 12 months', col] = '24'
+    df_enroll[col] = df_enroll[col].astype(int)
+    df_enroll.loc[df_enroll[col] == 99999, col] = np.nan
+    
+    # turn Times Homeless Past Three Years into numerical data
+    col = 'Times Homeless Past Three Years'
+    df_enroll = encode_unknown(df_enroll, col)
+    df_enroll.loc[df_enroll[col] == 'Unknown', col] = '99999'
+    df_enroll.loc[df_enroll[col] == '4 or more', col] = '4'
+    df_enroll[col] = df_enroll[col].astype(int)
+    df_enroll.loc[df_enroll[col] == 99999, col] = np.nan
     
     return df_enroll
 
@@ -174,6 +221,9 @@ def process_data_disability(sheet='Disability', datadir=None):
     df_disability = df_disability.dropna(axis=0, how='all')
     df_disability.index = df_disability.index.astype(int)
 
+    # remove any full duplicates
+    df_disability = df_disability.reset_index().drop_duplicates().set_index('Personal ID')
+    
     # turn these into integers
     cols = ['Disabilities ID', 'Project Entry ID']
     for col in cols:
@@ -214,6 +264,10 @@ def process_data_healthins(sheet='HealthInsurance', datadir=None):
 
     df_healthins = df_healthins.dropna(axis=0, how='all')
     df_healthins.index = df_healthins.index.astype(int)
+    
+    # remove any full duplicates
+    df_healthins = df_healthins.reset_index().drop_duplicates().set_index('Personal ID')
+    
     return df_healthins
 
 def process_data_benefit(sheet = 'Benefit', datadir=None):
@@ -237,6 +291,9 @@ def process_data_benefit(sheet = 'Benefit', datadir=None):
     df_benefit = df_benefit.dropna(axis=0, how='all')
     df_benefit.index = df_benefit.index.astype(int)
 
+    # remove any full duplicates
+    df_benefit = df_benefit.reset_index().drop_duplicates().set_index('Personal ID')
+    
     # Drop any project missing the code
     df_benefit = df_benefit.dropna(how='any', subset=['Non-Cash Benefit'])
 
@@ -307,6 +364,9 @@ def process_data_income(sheet='Income Entry & Exit', datadir=None):
     df_income = df_income.dropna(axis=0, how='all')
     df_income.index = df_income.index.astype(int)
 
+    # remove any full duplicates
+    df_income = df_income.reset_index().drop_duplicates().set_index('Personal ID')
+    
     # turn these into integers
     cols = ['Project Entry ID']
     for col in cols:
@@ -344,6 +404,9 @@ def process_data_project(sheet='Project', datadir=None):
     df_project = df_project.dropna(axis=0, how='all')
     df_project.index = df_project.index.astype(int)
 
+    # remove any full duplicates
+    df_project = df_project.reset_index().drop_duplicates().set_index('Project ID')
+    
     # Drop any project missing the code
     df_project = df_project.dropna(how='any', subset=['Project Type Code'])
 
@@ -388,6 +451,9 @@ def process_data_service(sheet='Service', datadir=None):
     df_service = df_service.dropna(axis=0, how='all')
     df_service.index = df_service.index.astype(int)
 
+    # remove any full duplicates
+    df_service = df_service.reset_index().drop_duplicates().set_index('Personal ID')
+    
     # Drop anyone missing these IDs
     df_service = df_service.dropna(how='any', subset=['Project ID', 'Project Entry ID'])
 
@@ -431,6 +497,9 @@ def process_data_bedinventory(sheet='BedInventory', datadir=None):
     df_bedinv = df_bedinv.dropna(axis=0, how='all')
     df_bedinv.index = df_bedinv.index.astype(int)
 
+    # remove any full duplicates
+    df_bedinv = df_bedinv.reset_index().drop_duplicates().set_index('Project ID')
+    
     # turn these into integers, assume zero if NaN
     cols = ['Inventory ID', 'HMIS Participating Beds', 'Unit Inventory', 'Bed Inventory', 'Vet Bed Inventory', 'Youth Bed Inventory']
     for col in cols:
@@ -439,3 +508,17 @@ def process_data_bedinventory(sheet='BedInventory', datadir=None):
         df_bedinv[col] = df_bedinv[col].astype(int)
     
     return df_bedinv
+
+def rename_columns(df):
+    '''Rename columns to be lowercase alphanumeric characters,
+    and turn spaces into underscores.
+    '''
+    
+    rename_dict = {}
+    columns = df.columns.tolist()
+    for col in columns:
+        rename_dict[col] = re.sub(r'([^\s\w]|_)+', '', col).lower().strip().replace('  ', ' ').replace(' ', '_')
+    
+    df = df.rename(columns=rename_dict)
+    return df
+
