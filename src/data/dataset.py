@@ -3,6 +3,8 @@ import pandas as pd
 import os
 import re
 
+from sklearn.feature_extraction import DictVectorizer
+
 def get_datadir():
     return os.path.join(os.getenv('HOME'), 'Dropbox', 'C4SF-datasci-homeless', 'raw')
 
@@ -615,25 +617,31 @@ def rename_columns(df):
     df = df.rename(columns=rename_dict)
     return df
 
-def encode_categorical_features(df, features):
+def encode_categorical_features(df, features, astype='int', method='records'):
+    # magnitude_list=None, magnitude_field=None
+    
+    cols_all = []
     for feature in features:
         prefix = '{}_'.format(feature)
         df[feature] = df[feature].fillna('none')
-        df, cols = myOneHotEncoder(df, feature, prefix=prefix)
-        # encode magnitude of feature; since the above is binary, assign units per feature
-        if feature in ['some_list_to_define']:
-            for col in cols:
-                df.loc[:, col] = df[col] * df['units']
+        df, cols = myOneHotEncoder(df, feature, prefix=prefix, astype=astype, method=method)
+        
+        # if magnitude_list is not None and magnitude_field is not None:
+        #     # encode magnitude of feature; since the above is binary, assign units per feature
+        #     if feature in magnitude_list:
+        #         for col in cols:
+        #             df.loc[:, col] = df[col] * df[magnitude_field]
+        
+        cols_all += cols
+    return (df, cols_all)
 
-    return df
-
-def myOneHotEncoder(df, column, prefix='', method='records'):
+def myOneHotEncoder(df, column, prefix='', astype='int', method='records'):
     cols = []
     vec = DictVectorizer()
     assignment = vec.fit_transform(df[[column]].to_dict(method)).toarray()
     for assign, ind in iter(vec.vocabulary_.items()):
         name = prefix + assign.split(vec.separator)[1].lower().replace('-', '').replace('  ', ' ').replace(' ', '_')
         df.loc[:, name] = assignment[:,ind]
-        df[name] = df[name].astype('bool')
+        df[name] = df[name].astype(astype)
         cols.append(name)
     return (df, cols)
