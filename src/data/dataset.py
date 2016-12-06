@@ -524,3 +524,24 @@ def rename_columns(df):
     df = df.rename(columns=rename_dict)
     return df
 
+def encode_categorical_features(df, features):
+    for feature in features:
+        df[feature] = df[feature].fillna('none')
+        df, cols = myOneHotEncoder(df, feature, prefix=prefix)
+        # encode magnitude of feature; since the above is binary, assign units per feature
+        if feature in ['some_list_to_define']:
+            for col in cols:
+                df.loc[:, col] = df[col] * df['units']
+
+    return df
+
+def myOneHotEncoder(df, column, prefix='', method='records'):
+    cols = []
+    vec = DictVectorizer()
+    assignment = vec.fit_transform(df[[column]].to_dict(method)).toarray()
+    for assign, ind in iter(vec.vocabulary_.items()):
+        name = prefix + assign.split(vec.separator)[1].lower().replace('-', '').replace('  ', ' ').replace(' ', '_')
+        df.loc[:, name] = assignment[:,ind]
+        df[name] = df[name].astype('bool')
+        cols.append(name)
+    return (df, cols)
