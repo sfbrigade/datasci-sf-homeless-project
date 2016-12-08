@@ -11,7 +11,7 @@ function uniq(a) {
 
   function drawChart() {
     // $.get("SFHomeless_individ_features_strings_parsed.csv", function(csvString) {
-      $.get("homeless_3_projects_outcome_parsed.csv", function(csvString) {
+      $.get("homeless_3_projects_outcome_parsed-1207.csv", function(csvString) {
             // transform the CSV string into a 2-dimensional array
       var arrayData = $.csv.toArrays(csvString, {onParseValue: $.csv.hooks.castToScalar});
       console.log(arrayData);
@@ -67,49 +67,7 @@ console.log(allPermanentHousing);
 
 var FinalDataArray = []; // only need one big array to store everything
 
-// -----------1. Race to Ethnicity-----------//
-
-for (var raceindex = 0; raceindex < allRaces.length; raceindex++) {  
-        for (var ethnicityindex = 0; ethnicityindex < allEthnicity.length; ethnicityindex++) { 
-                var nowCount = 0; 
-                var nowRace = allRaces[raceindex]; 
-                var nowEthnicity = allEthnicity[ethnicityindex]; 
-                for (var dataIndex = 0; dataIndex < arrayData.length; dataIndex++) { 
-                        if(arrayData[dataIndex][1] == nowRace   &&   arrayData[dataIndex][2] == nowEthnicity){
-                                nowCount++; 
-                              }
-                            }
-                var miniArray_local = []; 
-                miniArray_local.push(nowRace); 
-                miniArray_local.push(nowEthnicity); 
-                miniArray_local.push(nowCount);
-                // console.log(miniArray_local);
-                FinalDataArray.push(miniArray_local);
-              }
-            }
-
-// //-----------2. Ethnicity to Gender-----------//
-
-for (var ethnicityindex = 0; ethnicityindex < allEthnicity.length; ethnicityindex++) { 
-        for (var genderindex = 0; genderindex < allGenders.length; genderindex++) {
-                var nowCount = 0;  
-                var nowEthnicity = allEthnicity[ethnicityindex]; 
-                var nowGender = allGenders[genderindex];
-                for (var dataIndex = 0; dataIndex < arrayData.length; dataIndex++) { 
-                        if(arrayData[dataIndex][2] == nowEthnicity  &&  arrayData[dataIndex][3] == nowGender ){
-                                nowCount++; 
-                              }
-                            }
-                var miniArray_local = [];
-                miniArray_local.push(nowEthnicity);
-                miniArray_local.push(nowGender);
-                miniArray_local.push(nowCount);
-                // console.log(miniArray_local);
-                FinalDataArray.push(miniArray_local);
-              }
-            }
-
-// //-----------3. Gender to Veteran-----------//
+// //-----------1. Gender to Veteran-----------//
 
 for (var genderindex = 0; genderindex < allGenders.length; genderindex++) {  // choose an armed to look for
         for (var veteranindex = 0; veteranindex < allVeteran.length; veteranindex++) {  // choose a classification to look for
@@ -130,49 +88,69 @@ for (var genderindex = 0; genderindex < allGenders.length; genderindex++) {  // 
               }
             }
 
-
-
-// // //-----------4. Veteran to Age-----------//
-// for (var veteranindex = 0; veteranindex < allVeteran.length; veteranindex++) { 
-//         for (var ageindex = -1; ageindex <= 102; ageindex+=5) {  
-//                 var nowCount = 0;  
-//                 var nowVeteran = allVeteran[veteranindex];
-//                 var nowAge = ageindex; 
-//                 for (var dataIndex = 0; dataIndex < arrayData.length; dataIndex++) { 
-
-//                 var inDataAge = arrayData[dataIndex][6];
-                       
-//                         if(arrayData[dataIndex][4] == nowVeteran &&  inDataAge > nowAge  && inDataAge <= nowAge+5 ){ 
-//                                 nowCount++;  
-//                               }
-//                             }
-//                 var miniArray_local = []; 
-//                 miniArray_local.push(nowVeteran);
-//                 miniArray_local.push((nowAge+1) +'-'+(nowAge+5));
-//                 miniArray_local.push(nowCount);
-//                 FinalDataArray.push(miniArray_local);
-//               }
-//             }
-
-// //-----------4. Veteran to Status-----------//
+   // //-----------2. Veteran to Race-----------//
 for (var veteranindex = 0; veteranindex < allVeteran.length; veteranindex++) {  
-        for (var statusindex = 0; statusindex < allStatus.length; statusindex++) {  
+        for (raceindex = 0; raceindex < allRaces.length; raceindex++) {  
                 var nowCount = 0;  // start counting with no values
                 var nowVeteran = allVeteran[veteranindex];
-                var nowStatus = allStatus[statusindex]; 
+                var nowRace = allRaces[raceindex]; 
                 for (var dataIndex = 0; dataIndex < arrayData.length; dataIndex++) { 
-                        if(arrayData[dataIndex][4] == nowVeteran  &&  arrayData[dataIndex][8] == nowStatus ){ 
+                        if(arrayData[dataIndex][4] == nowVeteran  &&  arrayData[dataIndex][1] == nowRace ){ 
                                 nowCount++;  //add one value to our item count
                               }
                             }
                 var miniArray_local = []; 
                 miniArray_local.push(nowVeteran); 
+                miniArray_local.push(nowRace);
+                miniArray_local.push(nowCount);
+                // console.log(miniArray_local);
+                FinalDataArray.push(miniArray_local);
+              }
+            }         
+// -----------3. Race to Ethnicity-----------//
+
+for (var raceindex = 0; raceindex < allRaces.length; raceindex++) {  
+        for (var ethnicityindex = 0; ethnicityindex < allEthnicity.length; ethnicityindex++) { 
+                var nowCount = 0; 
+                var nowRace = allRaces[raceindex]; 
+                var nowEthnicity = allEthnicity[ethnicityindex]; 
+                for (var dataIndex = 0; dataIndex < arrayData.length; dataIndex++) { 
+                        if(arrayData[dataIndex][1] == nowRace   &&   arrayData[dataIndex][2] == nowEthnicity){
+                                nowCount++; 
+                              }
+                            }
+                var miniArray_local = []; 
+                miniArray_local.push(nowRace); 
+                miniArray_local.push(nowEthnicity); 
+                miniArray_local.push(nowCount);
+                // console.log(miniArray_local);
+                FinalDataArray.push(miniArray_local);
+              }
+            }
+
+// //-----------4. Ethnicity to Status-----------//
+
+for (var ethnicityindex = 0; ethnicityindex < allEthnicity.length; ethnicityindex++) { 
+        for (var statusindex = 0; statusindex < allStatus.length; statusindex++) {
+                var nowCount = 0;  
+                var nowEthnicity = allEthnicity[ethnicityindex]; 
+               var nowStatus = allStatus[statusindex];
+                for (var dataIndex = 0; dataIndex < arrayData.length; dataIndex++) { 
+                        if(arrayData[dataIndex][2] == nowEthnicity  &&  arrayData[dataIndex][8] == nowStatus ){
+                                nowCount++; 
+                              }
+                            }
+                var miniArray_local = [];
+                miniArray_local.push(nowEthnicity);
                 miniArray_local.push(nowStatus);
                 miniArray_local.push(nowCount);
                 // console.log(miniArray_local);
                 FinalDataArray.push(miniArray_local);
               }
             }
+
+
+
 
             // //-----------5. Status to Project 1-----------//
 for (var statusindex = 0; statusindex < allStatus.length; statusindex++) {  
@@ -271,10 +249,13 @@ var options = {
     // iterations: 0, //If set iterations to 0, and the diagram should draw according to the input order of the data.
     
     node: {
+      // width: 2,
+      nodePadding: 29,
       colors: colors,
-      labelPadding: 15,
+      labelPadding: 1,
       label: {  color: '#dddddd',
-                fontSize: 12, }
+                fontSize: 10,
+                 }
 
     },
     link: {
