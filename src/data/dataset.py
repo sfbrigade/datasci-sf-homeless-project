@@ -8,7 +8,7 @@ from sklearn.feature_extraction import DictVectorizer
 def get_datadir():
     return os.path.join(os.getenv('HOME'), 'Dropbox', 'C4SF-datasci-homeless', 'raw')
 
-def encode_boolean(df, col):
+def encode_boolean(df, col, val=False):
     '''Encode values as booleans.
     If the string is 'Yes', the new value will be True. Otherwise it will be False.
     '''
@@ -19,10 +19,10 @@ def encode_boolean(df, col):
                          "Client doesn't know",
                          'Data not collected',
                          '',
-                         np.nan]), col] = False
+                         np.nan]), col] = val
     return df
 
-def encode_unknown(df, col):
+def encode_unknown(df, col, val='Unknown'):
     '''Change non-informative values to 'Unknown'.
     '''
     df.loc[df[col].isin(['Client refused',
@@ -30,7 +30,7 @@ def encode_unknown(df, col):
                          "Client doesn't know",
                          'Data not collected',
                          '',
-                         np.nan]), col] = 'Unknown'
+                         np.nan]), col] = val
     return df
 
 def process_data_client(sheet='Client', datadir=None, simplify_strings=False):
@@ -206,14 +206,14 @@ def process_data_enrollment(sheet='Enrollment', datadir=None, simplify_strings=F
     df_enroll = encode_unknown(df_enroll, col)
     values = df_enroll[col].unique().tolist()
     df_enroll.loc[df_enroll[col] == 'More than 12 months', col] = '24'
-    df_enroll[col] = df_enroll[col].apply(lambda x: int(x) if isinstance(x, str) & x.isnumeric() else x)
+    df_enroll[col] = df_enroll[col].apply(lambda x: int(x) if isinstance(x, str) & x.isdigit() else x)
     df_enroll.loc[df_enroll[col] == 'Unknown', col] = np.nan
     
     # turn Times Homeless Past Three Years into numerical data
     col = 'Times Homeless Past Three Years'
     df_enroll = encode_unknown(df_enroll, col)
     df_enroll.loc[df_enroll[col] == '4 or more', col] = '4'
-    df_enroll[col] = df_enroll[col].apply(lambda x: int(x) if isinstance(x, str) & x.isnumeric() else x)
+    df_enroll[col] = df_enroll[col].apply(lambda x: int(x) if isinstance(x, str) & x.isdigit() else x)
     df_enroll.loc[df_enroll[col] == 'Unknown', col] = np.nan
     
     col = 'Housing Status @ Project Start'
@@ -617,13 +617,19 @@ def rename_columns(df):
     df = df.rename(columns=rename_dict)
     return df
 
-def encode_categorical_features(df, features, astype='int', method='records'):
+def encode_categorical_features(df, features, astype='int', method='records', reference_vals=None):
     # magnitude_list=None, magnitude_field=None
     
+    if not isinstance(features, list):
+        features = [features]
+    
+    if reference_vals is None:
+        reference_vals = [None] * len(features)
+    
     cols_all = []
-    for feature in features:
+    for i, feature in enumerate(features):
         prefix = '{}_'.format(feature)
-        df[feature] = df[feature].fillna('none')
+        df[feature] = df[feature].fillna('unknown')
         df, cols = myOneHotEncoder(df, feature, prefix=prefix, astype=astype, method=method)
         
         # if magnitude_list is not None and magnitude_field is not None:
