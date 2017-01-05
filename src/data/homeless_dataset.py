@@ -206,14 +206,22 @@ def process_data_enrollment(sheet='Enrollment', datadir=None, simplify_strings=F
     df_enroll = encode_unknown(df_enroll, col)
     values = df_enroll[col].unique().tolist()
     df_enroll.loc[df_enroll[col] == 'More than 12 months', col] = '24'
+<<<<<<< HEAD:src/data/homeless_dataset.py
     df_enroll[col] = df_enroll[col].apply(lambda x: int(x) if isinstance(x, str) & x.isdigit() else x)
+=======
+    df_enroll[col] = df_enroll[col].apply(lambda x: int(x) if isinstance(x, str) & x.isnumeric() else x)
+>>>>>>> sfbrigade/master:src/data/dataset.py
     df_enroll.loc[df_enroll[col] == 'Unknown', col] = np.nan
     
     # turn Times Homeless Past Three Years into numerical data
     col = 'Times Homeless Past Three Years'
     df_enroll = encode_unknown(df_enroll, col)
     df_enroll.loc[df_enroll[col] == '4 or more', col] = '4'
+<<<<<<< HEAD:src/data/homeless_dataset.py
     df_enroll[col] = df_enroll[col].apply(lambda x: int(x) if isinstance(x, str) & x.isdigit() else x)
+=======
+    df_enroll[col] = df_enroll[col].apply(lambda x: int(x) if isinstance(x, str) & x.isnumeric() else x)
+>>>>>>> sfbrigade/master:src/data/dataset.py
     df_enroll.loc[df_enroll[col] == 'Unknown', col] = np.nan
     
     col = 'Housing Status @ Project Start'
@@ -617,6 +625,7 @@ def rename_columns(df):
     df = df.rename(columns=rename_dict)
     return df
 
+<<<<<<< HEAD:src/data/homeless_dataset.py
 def encode_categorical_features(df, features, astype='int', method='records', reference_vals=None):
     # magnitude_list=None, magnitude_field=None
     
@@ -630,6 +639,15 @@ def encode_categorical_features(df, features, astype='int', method='records', re
     for i, feature in enumerate(features):
         prefix = '{}_'.format(feature)
         df[feature] = df[feature].fillna('unknown')
+=======
+def encode_categorical_features(df, features, astype='int', method='records'):
+    # magnitude_list=None, magnitude_field=None
+    
+    cols_all = []
+    for feature in features:
+        prefix = '{}_'.format(feature)
+        df[feature] = df[feature].fillna('none')
+>>>>>>> sfbrigade/master:src/data/dataset.py
         df, cols = myOneHotEncoder(df, feature, prefix=prefix, astype=astype, method=method)
         
         # if magnitude_list is not None and magnitude_field is not None:
