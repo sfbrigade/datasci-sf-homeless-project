@@ -36,7 +36,7 @@ def encode_unknown(df, col, val='Unknown'):
 def process_data_client(sheet='Client', datadir=None, simplify_strings=False):
     if datadir is None:
         datadir = get_datadir()
-    
+
     cols = [
         'Personal ID',
         'Race',
@@ -50,7 +50,7 @@ def process_data_client(sheet='Client', datadir=None, simplify_strings=False):
     df_client = pd.read_csv(infile, header=0, index_col=0, usecols=cols)
     df_client = df_client.dropna(how='all')
     df_client.index = df_client.index.astype(int)
-    
+
     # remove any full duplicates
     df_client = df_client.reset_index().drop_duplicates().set_index('Personal ID')
 
@@ -71,7 +71,7 @@ def process_data_client(sheet='Client', datadir=None, simplify_strings=False):
     df_client = encode_unknown(df_client, 'Race')
     df_client = encode_unknown(df_client, 'Ethnicity')
     df_client = encode_unknown(df_client, 'Gender')
-    
+
     if simplify_strings:
         col = 'Race'
         df_client.loc[df_client[col] == 'Black or African American', col] = 'Black'
@@ -86,13 +86,13 @@ def process_data_client(sheet='Client', datadir=None, simplify_strings=False):
         df_client.loc[df_client[col] == 'Transgender male to female', col] = 'TransMtoF'
         df_client.loc[df_client[col] == 'Transgender female to male', col] = 'TransFtoM'
         df_client[col] = df_client[col].apply(lambda x: x.lower())
-    
+
     return df_client
 
 def process_data_enrollment(sheet='Enrollment', datadir=None, simplify_strings=False):
     if datadir is None:
         datadir = get_datadir()
-    
+
     cols = [
         'Personal ID',
         'Project Entry ID',
@@ -129,7 +129,7 @@ def process_data_enrollment(sheet='Enrollment', datadir=None, simplify_strings=F
 
     # remove any full duplicates
     df_enroll = df_enroll.reset_index().drop_duplicates().set_index('Personal ID')
-    
+
     # drop anyone for whom we don't have age
     df_enroll = df_enroll.dropna(subset=['Client Age at Entry'])
 
@@ -160,17 +160,17 @@ def process_data_enrollment(sheet='Enrollment', datadir=None, simplify_strings=F
         'DV Currently Fleeing', ]
     for col in cols:
         df_enroll = encode_boolean(df_enroll, col)
-    
+
     # one person has a negative age. make it positive.
     col = 'Client Age at Entry'
     df_enroll.loc[df_enroll[col] < 0, col] = df_enroll.loc[df_enroll[col] < 0, col] * -1
-    
+
     # Only keep rows with exit date
     df_enroll = df_enroll[df_enroll['Exit Date'].notnull()]
-    
+
     # calculate the number of days that someone was enrolled
     df_enroll['Days Enrolled'] = ((df_enroll['Exit Date'] - df_enroll['Entry Date']) / np.timedelta64(1, 'D')).astype(int)
-    
+
     old_col = 'Residential Move In Date'
     new_col = 'Days To Residential Move In'
     dummy_date = pd.to_datetime('1970-01-01')
@@ -178,10 +178,10 @@ def process_data_enrollment(sheet='Enrollment', datadir=None, simplify_strings=F
     df_enroll[new_col] = ((df_enroll[old_col] - df_enroll['Entry Date']) / np.timedelta64(1, 'D')).astype(int)
     df_enroll.loc[df_enroll[new_col] <= 0, new_col] = np.nan
     df_enroll.loc[df_enroll[old_col] == dummy_date, old_col] = pd.NaT
-    
+
     # remove anyone with negative number of enrollment days
     df_enroll = df_enroll[df_enroll['Days Enrolled'] >= 0]
-    
+
     # turn DV When Occurred into numerical data
     col = 'DV When Occurred'
     df_enroll = encode_unknown(df_enroll, col)
@@ -193,42 +193,34 @@ def process_data_enrollment(sheet='Enrollment', datadir=None, simplify_strings=F
     df_enroll.loc[df_enroll[col] == 'Within the past three months', col] = 3
     # and rename the column
     df_enroll = df_enroll.rename(columns={col: 'Months Ago DV Occurred'})
-    
+
     # process head of household to be boolean
     old_col = 'Relationship to HoH'
     new_col = 'Head of Household'
     df_enroll[new_col] = False
     df_enroll.loc[df_enroll[old_col] == 'Self (head of household)', new_col] = True
     df_enroll = df_enroll.drop(old_col, axis=1)
-    
+
     # turn Months Homeless This Time into numerical data
     col = 'Months Homeless This Time'
     df_enroll = encode_unknown(df_enroll, col)
     values = df_enroll[col].unique().tolist()
     df_enroll.loc[df_enroll[col] == 'More than 12 months', col] = '24'
-<<<<<<< HEAD:src/data/homeless_dataset.py
     df_enroll[col] = df_enroll[col].apply(lambda x: int(x) if isinstance(x, str) & x.isdigit() else x)
-=======
-    df_enroll[col] = df_enroll[col].apply(lambda x: int(x) if isinstance(x, str) & x.isnumeric() else x)
->>>>>>> sfbrigade/master:src/data/dataset.py
     df_enroll.loc[df_enroll[col] == 'Unknown', col] = np.nan
-    
+
     # turn Times Homeless Past Three Years into numerical data
     col = 'Times Homeless Past Three Years'
     df_enroll = encode_unknown(df_enroll, col)
     df_enroll.loc[df_enroll[col] == '4 or more', col] = '4'
-<<<<<<< HEAD:src/data/homeless_dataset.py
     df_enroll[col] = df_enroll[col].apply(lambda x: int(x) if isinstance(x, str) & x.isdigit() else x)
-=======
-    df_enroll[col] = df_enroll[col].apply(lambda x: int(x) if isinstance(x, str) & x.isnumeric() else x)
->>>>>>> sfbrigade/master:src/data/dataset.py
     df_enroll.loc[df_enroll[col] == 'Unknown', col] = np.nan
-    
+
     col = 'Housing Status @ Project Start'
     df_enroll = encode_unknown(df_enroll, col)
     col = 'Living situation before program entry?'
     df_enroll = encode_unknown(df_enroll, col)
-    
+
     if simplify_strings:
         col = 'Housing Status @ Project Start'
         df_enroll.loc[df_enroll[col] == 'Stably housed', col] = 'Housed'
@@ -238,7 +230,7 @@ def process_data_enrollment(sheet='Enrollment', datadir=None, simplify_strings=F
         df_enroll.loc[df_enroll[col] == 'Category 3 - Homeless only under other federal statutes', col] = 'Cat3HomelessFedStatutes'
         df_enroll.loc[df_enroll[col] == 'Category 4 - Fleeing domestic violence', col] = 'Cat4FleeingDV'
         df_enroll[col] = df_enroll[col].apply(lambda x: x.lower())
-        
+
         col = 'Living situation before program entry?'
         df_enroll.loc[df_enroll[col] == 'Place not meant for habitation', col] = 'Streets'
         df_enroll.loc[df_enroll[col] == 'Emergency shelter, including hotel or motel paid for with emergency shelter voucher', col] = 'EmerShelter'
@@ -267,7 +259,7 @@ def process_data_enrollment(sheet='Enrollment', datadir=None, simplify_strings=F
 def process_data_disability(sheet='Disability', datadir=None, simplify_strings=False):
     if datadir is None:
         datadir = get_datadir()
-    
+
     cols = [
         'Personal ID',
         'Disability Type',
@@ -285,7 +277,7 @@ def process_data_disability(sheet='Disability', datadir=None, simplify_strings=F
 
     # remove any full duplicates
     df_disability = df_disability.reset_index().drop_duplicates().set_index('Personal ID')
-    
+
     # turn these into integers
     cols = ['Disabilities ID', 'Project Entry ID']
     for col in cols:
@@ -301,7 +293,7 @@ def process_data_disability(sheet='Disability', datadir=None, simplify_strings=F
     # encode booleans
     col = 'Receiving Services For'
     df_disability = encode_boolean(df_disability, col)
-    
+
     if simplify_strings:
         col = 'Disability Type'
         df_disability.loc[df_disability[col] == 'Mental Health Problem', col] = 'MentalHealth'
@@ -315,13 +307,13 @@ def process_data_disability(sheet='Disability', datadir=None, simplify_strings=F
         df_disability.loc[df_disability[col] == 'Vision Impaired', col] = 'Vision'
         df_disability.loc[df_disability[col] == 'Hearing Impaired', col] = 'Hearing'
         df_disability[col] = df_disability[col].apply(lambda x: x.lower() if isinstance(x, str) else np.nan)
-    
+
     return df_disability
 
 def process_data_healthins(sheet='HealthInsurance', datadir=None, simplify_strings=False):
     if datadir is None:
         datadir = get_datadir()
-    
+
     cols = [
         'Personal ID',
         'Health Insurance Information Date',
@@ -337,13 +329,13 @@ def process_data_healthins(sheet='HealthInsurance', datadir=None, simplify_strin
 
     df_healthins = df_healthins.dropna(axis=0, how='all')
     df_healthins.index = df_healthins.index.astype(int)
-    
+
     # remove any full duplicates
     df_healthins = df_healthins.reset_index().drop_duplicates().set_index('Personal ID')
-    
+
     col = 'Health Insurance'
     df_healthins = encode_unknown(df_healthins, col)
-    
+
     if simplify_strings:
         col = 'Health Insurance'
         df_healthins.loc[df_healthins[col] == 'State Health Insurance for Adults', col] = 'StateAdult'
@@ -353,13 +345,13 @@ def process_data_healthins(sheet='HealthInsurance', datadir=None, simplify_strin
         df_healthins.loc[df_healthins[col] == 'Private Pay Health Insurance', col] = 'Pirvate'
         df_healthins.loc[df_healthins[col] == 'Health Insurance obtained through COBRA', col] = 'COBRA'
         df_healthins[col] = df_healthins[col].apply(lambda x: x.lower())
-        
+
     return df_healthins
 
 def process_data_benefit(sheet='Benefit', datadir=None, simplify_strings=False):
     if datadir is None:
         datadir = get_datadir()
-    
+
     cols = [
         'Personal ID',
         'Project Entry ID',
@@ -379,7 +371,7 @@ def process_data_benefit(sheet='Benefit', datadir=None, simplify_strings=False):
 
     # remove any full duplicates
     df_benefit = df_benefit.reset_index().drop_duplicates().set_index('Personal ID')
-    
+
     # Drop any project missing the code
     df_benefit = df_benefit.dropna(how='any', subset=['Non-Cash Benefit'])
 
@@ -402,13 +394,13 @@ def process_data_benefit(sheet='Benefit', datadir=None, simplify_strings=False):
         df_benefit.loc[df_benefit[col] == 'TANF Child Care Services', col] = 'TANFChildCare'
         df_benefit.loc[df_benefit[col] == 'Temporary rental assistance', col] = 'TempRental'
         df_benefit[col] = df_benefit[col].apply(lambda x: x.lower())
-    
+
     return df_benefit
 
 def process_data_income(sheet='Income Entry & Exit', datadir=None, simplify_strings=False):
     if datadir is None:
         datadir = get_datadir()
-    
+
     cols = [
         'Personal ID',
         'Project Entry ID',
@@ -456,7 +448,7 @@ def process_data_income(sheet='Income Entry & Exit', datadir=None, simplify_stri
 
     # remove any full duplicates
     df_income = df_income.reset_index().drop_duplicates().set_index('Personal ID')
-    
+
     # turn these into integers
     cols = ['Project Entry ID']
     for col in cols:
@@ -476,7 +468,7 @@ def process_data_income(sheet='Income Entry & Exit', datadir=None, simplify_stri
 def process_data_project(sheet='Project', datadir=None, simplify_strings=False):
     if datadir is None:
         datadir = get_datadir()
-    
+
     cols = [
         'Project ID',
         'Project Name',
@@ -496,7 +488,7 @@ def process_data_project(sheet='Project', datadir=None, simplify_strings=False):
 
     # remove any full duplicates
     df_project = df_project.reset_index().drop_duplicates().set_index('Project ID')
-    
+
     # Drop any project missing the code
     df_project = df_project.dropna(how='any', subset=['Project Type Code'])
 
@@ -510,7 +502,7 @@ def process_data_project(sheet='Project', datadir=None, simplify_strings=False):
     df_project['Address Postal Code'] = df_project['Address Postal Code'].fillna(value='0')
     df_project['Address Postal Code'] = df_project['Address Postal Code'].apply(lambda x: x[:5])
     df_project['Address Postal Code'] = df_project['Address Postal Code'].astype(int)
-    
+
     if simplify_strings:
         col = 'Project Type Code'
         df_project.loc[df_project[col] == 'Transitional housing', col] = 'TransitionalHousing'
@@ -527,7 +519,7 @@ def process_data_project(sheet='Project', datadir=None, simplify_strings=False):
 def process_data_service(sheet='Service', datadir=None, simplify_strings=False):
     if datadir is None:
         datadir = get_datadir()
-    
+
     cols =  [
         'Personal ID',
         'Services ID',
@@ -551,7 +543,7 @@ def process_data_service(sheet='Service', datadir=None, simplify_strings=False):
 
     # remove any full duplicates
     df_service = df_service.reset_index().drop_duplicates().set_index('Personal ID')
-    
+
     # Drop anyone missing these IDs
     df_service = df_service.dropna(how='any', subset=['Project ID', 'Project Entry ID'])
 
@@ -562,21 +554,21 @@ def process_data_service(sheet='Service', datadir=None, simplify_strings=False):
 
     # drop any null dates
     df_service = df_service.dropna(subset=['Date Provided', 'Date Ended'])
-    
+
     # calculate the number of days service was given
     df_service['Days'] = ((df_service['Date Ended'] - df_service['Date Provided']) / np.timedelta64(1, 'D')).astype(int)
-    
+
     if simplify_strings:
         col = 'Description'
         df_service.loc[df_service[col] == 'Emergency Shelter', col] = 'EmergencyShelter'
         df_service[col] = df_service[col].apply(lambda x: x.lower())
-    
+
     return df_service
 
 def process_data_bedinventory(sheet='BedInventory', datadir=None, simplify_strings=False):
     if datadir is None:
         datadir = get_datadir()
-    
+
     cols = [
         'Project ID',
         'Inventory ID',
@@ -602,60 +594,50 @@ def process_data_bedinventory(sheet='BedInventory', datadir=None, simplify_strin
 
     # remove any full duplicates
     df_bedinv = df_bedinv.reset_index().drop_duplicates().set_index('Project ID')
-    
+
     # turn these into integers, assume zero if NaN
     cols = ['Inventory ID', 'HMIS Participating Beds', 'Unit Inventory', 'Bed Inventory', 'Vet Bed Inventory', 'Youth Bed Inventory']
     for col in cols:
         # df_bedinv[col] = df_bedinv.loc[~df_bedinv[col].isnull(), col].apply(lambda x: int(x))
         df_bedinv[col] = df_bedinv[col].fillna(value=0)
         df_bedinv[col] = df_bedinv[col].astype(int)
-    
+
     return df_bedinv
 
 def rename_columns(df):
     '''Rename columns to be lowercase alphanumeric characters,
     and turn spaces into underscores.
     '''
-    
+
     rename_dict = {}
     columns = df.columns.tolist()
     for col in columns:
         rename_dict[col] = re.sub(r'([^\s\w]|_)+', '', col).lower().strip().replace('  ', ' ').replace(' ', '_')
-    
+
     df = df.rename(columns=rename_dict)
     return df
 
-<<<<<<< HEAD:src/data/homeless_dataset.py
 def encode_categorical_features(df, features, astype='int', method='records', reference_vals=None):
     # magnitude_list=None, magnitude_field=None
-    
+
     if not isinstance(features, list):
         features = [features]
-    
+
     if reference_vals is None:
         reference_vals = [None] * len(features)
-    
+
     cols_all = []
     for i, feature in enumerate(features):
         prefix = '{}_'.format(feature)
         df[feature] = df[feature].fillna('unknown')
-=======
-def encode_categorical_features(df, features, astype='int', method='records'):
-    # magnitude_list=None, magnitude_field=None
-    
-    cols_all = []
-    for feature in features:
-        prefix = '{}_'.format(feature)
-        df[feature] = df[feature].fillna('none')
->>>>>>> sfbrigade/master:src/data/dataset.py
         df, cols = myOneHotEncoder(df, feature, prefix=prefix, astype=astype, method=method)
-        
+
         # if magnitude_list is not None and magnitude_field is not None:
         #     # encode magnitude of feature; since the above is binary, assign units per feature
         #     if feature in magnitude_list:
         #         for col in cols:
         #             df.loc[:, col] = df[col] * df[magnitude_field]
-        
+
         cols_all += cols
     return (df, cols_all)
 
