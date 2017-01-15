@@ -4,11 +4,11 @@
 
 Install Jupyter Notebook; this is most easily done by installing Anaconda: https://www.continuum.io/downloads
 
-Install seaborn. To do this in a new conda environment:
+Install seaborn. To do this in a new conda environment:  
 ```conda create --name datasci seaborn```
 
-To deactivate/activate the environment:
-```source deactivate datasci```
+To deactivate/activate the environment:  
+```source deactivate datasci```  
 ```source activate datasci```
 
 ## Get Started
