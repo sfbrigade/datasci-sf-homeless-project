@@ -339,7 +339,7 @@ def process_data_healthins(sheet='HealthInsurance', datadir=None, simplify_strin
     if simplify_strings:
         col = 'Health Insurance'
         df_healthins.loc[df_healthins[col] == 'State Health Insurance for Adults', col] = 'StateAdult'
-        df_healthins.loc[df_healthins[col] == "Veteran's Administration (VA) Medical Services", col] = 'Veteran'
+        df_healthins.loc[df_healthins[col] == "Veteran's Administration (VA) Medical Services", col] = 'VeteranAdmin'
         df_healthins.loc[df_healthins[col] == "State Children's Health Insurance Program", col] = 'StateChild'
         df_healthins.loc[df_healthins[col] == 'Employer - Provided Health Insurance', col] = 'Employer'
         df_healthins.loc[df_healthins[col] == 'Private Pay Health Insurance', col] = 'Pirvate'
@@ -612,7 +612,11 @@ def rename_columns(df):
     rename_dict = {}
     columns = df.columns.tolist()
     for col in columns:
-        rename_dict[col] = re.sub(r'([^\s\w]|_)+', '', col).lower().strip().replace('  ', ' ').replace(' ', '_')
+        re_pattern = r'([^\s\w])+'
+        # re_pattern = r'([^\s\w]|_)+' # also removes underscores
+        # \s is whitespace
+        # \w is any alphanumeric character and the underscore
+        rename_dict[col] = re.sub(re_pattern, '', col).lower().strip().replace('  ', ' ').replace(' ', '_')
 
     df = df.rename(columns=rename_dict)
     return df
