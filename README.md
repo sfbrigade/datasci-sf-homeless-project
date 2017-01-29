@@ -23,7 +23,7 @@ View the [HMIS Data Science Study Presentation](https://docs.google.com/presenta
 - [Load and clean the data](https://github.com/sfbrigade/datasci-sf-homeless-project/blob/master/notebooks/load_data_example_v2.ipynb)
 - [Explore the data](https://github.com/sfbrigade/datasci-sf-homeless-project/blob/master/notebooks/2016-10-19_mvm_exploration.ipynb)
 - [Feature engineering to prepare input variables](https://github.com/sfbrigade/datasci-sf-homeless-project/blob/master/notebooks/2016-12-05_mvm_one_hot_encode.ipynb)
-- [Run logistic regression model](https://github.com/warmlogic/datasci-sf-homeless-project/blob/master/notebooks/2017-01-22_mvm_permanent_housing_predictions.ipynb)
+- [Make outcome predictions with logistic regression model](https://github.com/warmlogic/datasci-sf-homeless-project/blob/master/notebooks/2017-01-22_mvm_permanent_housing_predictions.ipynb)
 
 ## Setup
 
