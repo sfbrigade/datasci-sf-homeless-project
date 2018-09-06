@@ -1,7 +1,7 @@
 ![](datasciheader.png)
-# Northern California Homelessness Analysis
+# CTA-NorCal Homeless Program Outcomes Analysis
 
-## HMIS Data Science Study
+## HMIS Analytics 
 
 Members of the [Data Science Working Group](https://github.com/sfbrigade/data-science-wg) at Code for San Francisco have been charged with answering the [Community Technology Alliance’s](https://ctagroup.org/) prompt about homelessness programs.
 
